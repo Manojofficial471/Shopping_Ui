@@ -1,4 +1,4 @@
-// lib/special_Offer.dart/data.dart
+//data for the Special_offer section
 final List<Map<String, String>> data_special = [
   {
     'image': 'assets/oil.png',

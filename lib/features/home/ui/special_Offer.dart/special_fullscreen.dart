@@ -1,26 +1,50 @@
+import 'package:dummy_project/features/home/contoller/special_controller.dart';
+import 'package:dummy_project/features/home/model/cart.dart';
+import 'package:dummy_project/features/home/ui/cart_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FullscreenItemPage extends StatelessWidget {
   final Map<String, String> item;
+  final int productId;
 
-  const FullscreenItemPage({super.key, required this.item});
+  final controller = Get.put(SpecialOfferController());
+
+  FullscreenItemPage({super.key, required this.item, required this.productId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: const [
-          Icon(
+        actions: [
+          const Icon(
             Icons.search,
             color: Colors.black,
           ),
-          SizedBox(
-            width: 5,
+          const SizedBox(width: 5),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart, size: 25),
+                onPressed: () {
+                  print(
+                      'Number of different products in the cart: ${controller.getProductCount()}');
+                  Get.to(() => CartPage());
+                },
+              ),
+              Positioned(
+                  top: 1,
+                  right: 2,
+                  child: Obx(() => CircleAvatar(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      radius: 7,
+                      child: Text(
+                        "${controller.getProductCount()}",
+                        style: const TextStyle(fontSize: 10),
+                      ))))
+            ],
           ),
-          Icon(
-            Icons.shopping_cart,
-            color: Colors.black,
-          )
         ],
       ),
       body: Column(
@@ -31,10 +55,8 @@ class FullscreenItemPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image with a fixed height to maintain aspect ratio
                   SizedBox(
-                    height:
-                        300, // You can adjust this height based on your design needs
+                    height: 300,
                     width: double.infinity,
                     child: Image.asset(
                       item['image']!,
@@ -68,18 +90,33 @@ class FullscreenItemPage extends StatelessWidget {
                           "Select Options",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => controller.increment(productId),
+                              child: const Text("+"),
+                            ),
+                            const SizedBox(width: 10),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Obx(() => Text(
+                                  "Quantity: ${controller.getCount(productId)}")),
+                            ),
+                            const SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () => controller.decrement(productId),
+                              child: const Text("-"),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
                         const Chip(label: Text("GMS")),
-                        const SizedBox(
-                          height: 5,
-                        ),
+                        const SizedBox(height: 5),
                         const Text(
                           "Overview",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
+                        const SizedBox(height: 10),
                         const Text(
                           "Grocery shopping has undergone a profound transformation over the past few decades. Once a routine activity involving a trip to a local store, it has evolved into a complex and multifaceted experience shaped by technological advancements, shifting consumer preferences, and global challenges. This evolution reflects broader changes in society and highlights the growing intersection between convenience, sustainability, and technology.\n\n"
                           "Traditional Grocery Shopping\n\n"
@@ -106,10 +143,22 @@ class FullscreenItemPage extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Define cart button action here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Added to cart!')),
-                    );
+                    if (controller.getCount(productId) == 0) {
+                      Get.snackbar('The Quantity is 0', '',
+                          snackPosition: SnackPosition.BOTTOM);
+                    } else {
+                      final cart = Cart(
+                        description: item['price']!,
+                        title: item['title']!,
+                        image: item['image']!,
+                        quantity: controller.getCount(productId),
+                      );
+                      controller.addCart(cart);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to cart!')),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(100, 40),

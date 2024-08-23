@@ -1,9 +1,16 @@
-import 'package:dummy_project/trending_products/trending_products.dart';
+import 'package:dummy_project/features/bottom_nav/ui/bottom-nav.dart';
+import 'package:dummy_project/features/home/contoller/cart_controller.dart';
+import 'package:dummy_project/features/home/ui/cart_page.dart';
+import 'package:dummy_project/features/home/ui/new_product/new_products.dart';
+
+import 'package:dummy_project/features/home/ui/trending_products/trending_products.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../catergory_avatar/catergory_avatar.dart';
-import '../special_Offer.dart/special_offer.dart';
-import '../brand_grid/popular_brands_grid.dart';
+import 'package:get/get.dart';
+
+import 'catergory_avatar.dart';
+import 'special_Offer.dart/special_offer.dart';
+import 'popular_brands_grid.dart';
 
 class HomeScreen extends StatefulWidget {
   final TextEditingController search = TextEditingController();
@@ -15,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final controller = Get.put(CartController());
+
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -39,18 +48,27 @@ class _HomeScreenState extends State<HomeScreen> {
             const PopularBrandsGrid(),
             const SizedBox(height: 8.0),
             _buildSectionTitle("Special Offers"),
-            const SizedBox(height: 250, child: SpecialOffer()),
+            SizedBox(height: 250, child: SpecialOffer()),
             _buildSectionTitle("Trending Products"),
-            const SizedBox(height: 250, child: TrendingProducts()),
+            SizedBox(height: 250, child: TrendingProducts()),
+            _buildSectionTitle("New Products"),
+            SizedBox(
+              height: 250,
+              child: HomeProducts(),
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: BottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 
   AppBar _buildAppBar() {
     return AppBar(
+      automaticallyImplyLeading: false,
       title: const Text(
         'Sarkar Shopping',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -70,11 +88,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(color: Colors.blue, fontSize: 14)),
                 ],
               ),
-              IconButton(
-                icon: const Icon(Icons.shopping_cart, size: 25),
-                onPressed: () {
-                  // Implement shopping cart action
-                },
+              Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart, size: 25),
+                    onPressed: () {
+                      print(
+                          'Number of different products in the cart: ${controller.getProductCount()}');
+                      Get.to(() => CartPage());
+                    },
+                  ),
+                  Positioned(
+                      top: 1,
+                      right: 2,
+                      child: Obx(() => CircleAvatar(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          radius: 7,
+                          child: Text(
+                            "${controller.getProductCount()}",
+                            style: TextStyle(fontSize: 10),
+                          ))))
+                ],
               ),
             ],
           ),
@@ -110,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       items: [
         'assets/Banner.jpg',
-        // Add more banner items if needed
       ]
           .map((item) => Container(
                 margin: const EdgeInsets.all(5.0),
@@ -131,25 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(left: 8.0),
       child: Text(title,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-    );
-  }
-
-  BottomNavigationBar _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: Colors.white,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black,
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.category), label: "Category"),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorite"),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag), label: "Orders"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
     );
   }
 }

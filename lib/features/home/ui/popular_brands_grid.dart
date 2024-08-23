@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dummy_project/brand_grid/brand_data.dart';
+import 'package:dummy_project/data/brand_data.dart';
 
 class PopularBrandsGrid extends StatelessWidget {
   const PopularBrandsGrid({super.key});

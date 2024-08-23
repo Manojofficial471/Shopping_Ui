@@ -1,4 +1,3 @@
-// lib/trending_products/data.dart
 final List<Map<String, String>> items1 = [
   {
     'image': 'assets/basmati.jpeg',
